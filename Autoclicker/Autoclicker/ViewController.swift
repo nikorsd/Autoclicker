@@ -13,7 +13,8 @@ class ViewController: NSViewController {
     @IBOutlet weak var startButton: NSButton!
     @IBOutlet weak var stopButton: NSButton!
     @IBOutlet weak var intervalTextField: NSTextField!
-
+    @IBOutlet weak var alwaysOnTopMenuItem: NSMenuItem!
+    
     var timer: Timer?
     var clickInterval: Double = 0.0
     var isClicking = false // Track if auto-clicking is enabled
@@ -26,17 +27,38 @@ class ViewController: NSViewController {
         // Request Accessibility permissions
         let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let accessEnabled = AXIsProcessTrustedWithOptions(options)
-        requestAccessibilityPermission()
+        
+        stopButton.isEnabled = false
+        view.window?.level = .floating
         
         if !accessEnabled {
-            print("⚠️ Accessibility permissions are required!")
+            print("Accessibility permissions are required!")
             requestAccessibilityPermission()
         }
+        updateMenuItems()
     }
+    
+    @IBAction func toggleAlwaysOnTop(_ sender: NSMenuItem) {
+        guard let window = self.view.window else { return }
 
+        // Toggle window level
+        if window.level == .floating {
+            window.level = .normal // Disable "Always on Top"
+            sender.state = .off
+        } else {
+            window.level = .floating // Enable "Always on Top"
+            sender.state = .on
+        }
+    }
+    
+    func updateMenuItems() {
+            guard let window = self.view.window else { return }
+            alwaysOnTopMenuItem.state = (window.level == .floating) ? .on : .off
+        }
+    
     // Action for the Start Button
     @IBAction func startClicking(_ sender: NSButton) {
-        print("✅ Auto-clicking started!")
+        print("Auto-clicking started")
 
         // Get the interval value from the text field
         let intervalText = intervalTextField.stringValue
@@ -65,7 +87,7 @@ class ViewController: NSViewController {
 
     // Action for the Stop Button
     @IBAction func stopClicking(_ sender: NSButton) {
-        print("⏹ Auto-clicking stopped!")
+        print("Auto-clicking stopped")
 
         // Stop clicking
         stopAutoClicking()
@@ -77,7 +99,7 @@ class ViewController: NSViewController {
     }
     
     func startAutoClicking() {
-        print("⏳ Timer started with interval: \(clickInterval) seconds")
+        print("Timer started with interval: \(clickInterval) seconds")
 
         // Start by clicking at the current mouse location
         clickMouse()
@@ -110,9 +132,9 @@ class ViewController: NSViewController {
             mouseDown?.post(tap: .cghidEventTap)
             mouseUp?.post(tap: .cghidEventTap)
 
-            print("✅ Clicked at \(correctedPoint)")
+            print("Clicked at \(correctedPoint)")
         } else {
-            print("❌ Failed to get screen height!")
+            print("Failed to get screen height!")
         }
     }
 
@@ -122,9 +144,9 @@ class ViewController: NSViewController {
         let accessEnabled = AXIsProcessTrustedWithOptions(options)
         
         if !accessEnabled {
-            print("⚠️ Accessibility permissions are required! Please enable them in System Settings.")
+            print("Accessibility permissions are required! Please enable them in System Settings.")
         } else {
-            print("✅ Accessibility permissions granted!")
+            print("Accessibility permissions granted!")
         }
     }
 

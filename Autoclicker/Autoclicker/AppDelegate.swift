@@ -14,7 +14,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
+        if let menuItem = NSApp.mainMenu?.item(withTitle: "Always on Top") {
+                menuItem.isEnabled = true // Enable the menu item
+            }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
